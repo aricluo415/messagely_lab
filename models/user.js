@@ -19,7 +19,7 @@ class User {
      */
 
     static async register({ username, password, first_name, last_name, phone }) {
-        const hashedPwd = await bcrypt.hash(password, BCRYPT_WORK_FACTOR)
+        const hashedPwd = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
         const result = await db.query(
             `INSERT INTO users (username,
                                password,
@@ -30,7 +30,7 @@ class User {
 							   last_login_at)
            VALUES
              ($1, $2, $3, $4, $5, current_timestamp, current_timestamp)
-		   RETURNING username, password, first_name, last_name, phone`, [username, hashedPwd, first_name, last_name, phone]);
+		   RETURNING username, first_name, last_name, phone`, [username, hashedPwd, first_name, last_name, phone]);
         return result.rows[0];
     }
 
@@ -95,11 +95,18 @@ class User {
      *
      * where to_user is
      *   {username, first_name, last_name, phone}
+     *   { id, to_user:{username, first_name, last_name, phone}, body, sent_at, read_at}
      */
 
     static async messagesFrom(username) {
         const results = await db.query(
-            `SELECT m.id, m.body, m.sent_at, m.read_at,
+            `SELECT m.id, m.body, m.sent_at, m.read_at, (
+                SELECT row_to_json(x) FROM (
+                    SELECT t.username, t.first_name, t.last_name, t.phone 
+                    FROM users AS t 
+                    WHERE t.username = m.to_username
+                ) x
+            ) AS to_user
 			FROM messages as m
 			WHERE m.from_username = $1
 		`, [username])
@@ -114,7 +121,20 @@ class User {
      *   {id, first_name, last_name, phone}
      */
 
-    static async messagesTo(username) {}
+    static async messagesTo(username) {
+        const results = await db.query(
+            `SELECT m.id, m.body, m.sent_at, m.read_at, (
+                SELECT row_to_json(x) FROM (
+                    SELECT t.username, t.first_name, t.last_name, t.phone 
+                    FROM users AS t 
+                    WHERE t.username = m.from_username
+                ) x
+            ) AS from_user
+			FROM messages as m
+			WHERE m.to_username = $1
+		`, [username])
+        return results.rows;
+    }
 }
 
 

@@ -1,10 +1,10 @@
 {
   "name": "messagely",
   "version": "1.1.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest -i"
+    "test": "jest -i",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,8 +15,20 @@
     "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "express-cors": "^0.0.3",
+    "jest": "^26.6.2",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.2.1",
     "supertest": "^5.0.0-0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aricluo415/messagely_lab.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/aricluo415/messagely_lab/issues"
+  },
+  "homepage": "https://github.com/aricluo415/messagely_lab#readme",
+  "description": ""
 }
