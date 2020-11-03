@@ -2,21 +2,38 @@
 
 const Router = require("express").Router;
 const router = new Router();
-
+const { ensureLoggedIn, ensureCorrectUser } = require("../middleware/auth.js")
+const User = require("../models/user.js");
 
 /** GET / - get list of users.
  *
  * => {users: [{username, first_name, last_name, phone}, ...]}
  *
  **/
-
+router.get("/", ensureLoggedIn, async function(req, res, next) {
+    try {
+        const users = await User.all();
+        return res.status(200).json({ users });
+    } catch (err) {
+        return next(err);
+    }
+})
 
 /** GET /:username - get detail of users.
  *
  * => {user: {username, first_name, last_name, phone, join_at, last_login_at}}
  *
  **/
-
+router.get("/:username", ensureCorrectUser, async function(req, res, next) {
+    try {
+        const username = req.params.username;
+        console.log(username)
+        const user = await User.get(username);
+        return res.status(200).json({ user });
+    } catch (err) {
+        return next(err);
+    }
+})
 
 /** GET /:username/to - get messages to user
  *
@@ -27,7 +44,15 @@ const router = new Router();
  *                 from_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
-
+router.get("/:username/to", ensureCorrectUser, async function(req, res, next) {
+    try {
+        const username = req.params.username;
+        const messages = await User.messagesTo(username);
+        return res.status(200).json({ messages });
+    } catch (err) {
+        return next(err);
+    }
+})
 
 /** GET /:username/from - get messages from user
  *
@@ -38,5 +63,14 @@ const router = new Router();
  *                 to_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+router.get("/:username/from", ensureCorrectUser, async function(req, res, next) {
+    try {
+        const username = req.params.username;
+        const messages = await User.messagesFrom(username);
+        return res.status(200).json({ messages });
+    } catch (err) {
+        return next(err);
+    }
+})
 
 module.exports = router;
