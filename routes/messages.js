@@ -25,7 +25,7 @@ router.get("/:id", ensureLoggedIn, async function(req, res, next) {
         const message_from = message.from_user.username;
         const message_to = message.to_user.username;
         if (currentUser !== message_from && currentUser !== message_to) {
-            throw new UnauthorizedError("Not sender or reciever")
+            throw new UnauthorizedError("Not sender or reciever");
         }
         return res.status(200).json({ message });
     } catch (err) {
